@@ -120,7 +120,7 @@ The two interviews are long by design. Answer concretely and keep going — the 
 
 ## How the skills are written
 
-Each `SKILL.md` is a numbered workflow. Every step states what to do, the judgement that makes it hard, and a `Done when` line that tells the agent when it can move on. Interactive skills ask exactly one question per turn and hold their verdict until the deciding variable is settled. Every skill writes in the language you write in.
+Each `SKILL.md` is a numbered workflow. Every step states what to do, the judgement that makes it hard, and a `Done when` line that tells the agent when it can move on. Interactive skills ask exactly one question per turn and hold their verdict until the deciding variable is settled. Every skill writes in the language you write in. The full conventions — frontmatter, step shape, fidelity rules, and the pre-PR checklist — are in [HOUSE-STYLE.md](HOUSE-STYLE.md).
 
 ## Credits
 
@@ -254,7 +254,7 @@ npx skills add coolTheWorld/evolution-skills --skill socratic
 
 ## Skill 的写法
 
-每个 `SKILL.md` 都是一条编号的工作流。每一步写清要做什么、难点在哪、以及一行 `Done when` 告诉 agent 什么时候才算做完可以往下走。交互型 skill 每轮只问一个问题，在关键变量落定之前不给结论。所有 skill 都用你使用的语言回复。
+每个 `SKILL.md` 都是一条编号的工作流。每一步写清要做什么、难点在哪、以及一行 `Done when` 告诉 agent 什么时候才算做完可以往下走。交互型 skill 每轮只问一个问题，在关键变量落定之前不给结论。所有 skill 都用你使用的语言回复。完整规范（frontmatter、步骤写法、忠实度规则、提 PR 前的检查清单）见 [HOUSE-STYLE.md](HOUSE-STYLE.md)。
 
 ## 致谢
 
