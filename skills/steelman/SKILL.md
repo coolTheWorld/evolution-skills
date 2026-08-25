@@ -1,10 +1,14 @@
 ---
 name: steelman
-description: Steelman both sides of a decision, isolate the crux, and drive to a verdict. Use when the user wants the strongest case for and against an idea, suspects their question is not yet well-formed, or is about to commit to a consequential decision.
+description: Steelman both sides of a decision, isolate the crux, and drive to a verdict.
+argument-hint: <the decision — the options, your goal, and the real constraints>
+disable-model-invocation: true
 license: Apache-2.0
 ---
 
 A question arrives pre-framed, and the framing is usually the weakest part of it. Hold the answer: **steelman** both sides, isolate the **crux**, and rule only once the crux is settled.
+
+Write in the language the user writes in.
 
 ## 1. Restate the real problem
 
@@ -39,6 +43,8 @@ Ask the single question whose answer moves the verdict most. Ask exactly one, th
 Carry your own recommended answer with the question, so the user is correcting a position rather than filling a blank.
 
 Reserve the question for what needs the user's judgement, private context, or risk appetite; anything you can look up, look up.
+
+Done when exactly one question is on the table, it carries your recommended answer, and the turn has ended.
 
 ## 5. Settle the crux, then rule
 
