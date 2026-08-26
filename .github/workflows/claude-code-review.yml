@@ -1,0 +1,84 @@
+name: Claude Code Review
+
+# Reviews a pull request against HOUSE-STYLE.md — only the rules scripts/check.js
+# cannot check (fidelity, density, voice). Needs two things the owner sets up once:
+# the Claude GitHub App installed on this repository (https://github.com/apps/claude)
+# and the CLAUDE_CODE_OAUTH_TOKEN secret from `claude setup-token`. Until both exist
+# this check shows as failed. Strangers cannot spend the token: GitHub never hands
+# secrets or an id-token to fork pull requests, and claude-code-action stops before
+# running Claude unless the actor has write access — their PRs show a failed check,
+# nothing more.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, ready_for_review, reopened]
+    paths:
+      - "skills/**"
+      - "README.md"
+      - "HOUSE-STYLE.md"
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request against HOUSE-STYLE.md, the contributing guide for this
+            repository of agent skills. The PR branch is checked out in the working directory;
+            run `gh pr diff` to see what changed. Read HOUSE-STYLE.md and skills/steelman/SKILL.md
+            (the exemplar) in full before judging anything.
+
+            CI already enforces every mechanical rule — frontmatter keys and order, heading
+            levels, step numbering, "Done when" lines, line counts, README table rows and usage
+            blocks, links — through scripts/check.js. Do not repeat those. Judge only what a
+            script cannot:
+
+            - Fidelity: when the PR names or includes the source prompt a skill was rewritten
+              from, every requirement of the source survives — every numbered item, rule, output
+              artifact, numeric limit, ordering, persona stance. Flag anything dropped or
+              weakened. When a skill is new and its source is not in the PR, say so in one
+              top-level comment and skip this axis.
+            - Density: every sentence changes behaviour versus what the model would do anyway;
+              no no-ops ("be thorough", "be careful", "think step by step"); each rule stated
+              once, in the step where it bites; targets stated positively, prohibitions only as
+              hard guardrails beside a positive target.
+            - Leading words: 1–3 compact concepts already native to the model, bolded on first
+              use in the framing paragraph and reused as tokens, never re-explained.
+            - "Done when" lines: each is checkable (done vs not-done is unambiguous) and
+              exhaustive (it binds every item the step must produce).
+            - Interactive skills: an explicit still-open/settled loop, hard numeric question
+              budgets paired with a stop-as-soon-as-you-have-enough rule, and the one-sentence
+              missing-input rule.
+            - Final deliverable: bold-labelled bullets in the order the source specifies, one
+              line each saying what the item must contain.
+            - Voice: second-person-implied imperatives, concrete and declarative; no hedging,
+              adjective stacks, meta-commentary, or closing pep talk; spelling consistent within
+              the file.
+            - README: a new table row and usage block read like the existing ones, in both the
+              English and 中文 sections.
+
+            Post each finding as an inline comment on the exact line, quoting the HOUSE-STYLE
+            rule it breaks and proposing the rewritten sentence. Findings only — no praise, no
+            summaries. When nothing breaks a rule, post nothing.
+          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
+          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+          # or https://code.claude.com/docs/en/cli-reference for available options
