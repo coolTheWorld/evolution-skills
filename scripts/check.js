@@ -45,6 +45,8 @@ const EXEMPT_FROM_MAX = ['life-design'];
 // list is declared: a new interactive skill is added here in the same PR.
 const INTERACTIVE = ['socratic', 'steelman', 'hidden-talents', 'life-design'];
 const WORKFLOWS = ['check.yml', 'claude-code-review.yml', 'claude.yml'];
+// A skill is 45-90 lines; the parsers below are quadratic on pathological input, so cap what they see.
+const MAX_BYTES = 64 * 1024;
 
 // Emoji as a reader sees them: emoji-presentation characters, flags (regional
 // indicator pairs), and the keycap / emoji-variation selectors. Text-presentation
@@ -176,6 +178,7 @@ for (const s of skills) {
   const file = `skills/${s}/SKILL.md`;
   const text = read(file);
   if (text === null) { fail(`${s}: SKILL.md exists`); continue; }
+  if (text.length > MAX_BYTES) { fail(`${s}: SKILL.md is under ${MAX_BYTES / 1024} KB (${Math.round(text.length / 1024)} KB)`); continue; }
 
   // frontmatter — exact keys, exact order
   const fm = frontmatter(text);
@@ -269,25 +272,32 @@ for (const [label, section] of SECTIONS) {
 
 // --- every relative markdown link resolves -------------------------------------------
 const brokenLinks = [];
+const oversized = [];
 for (const f of ALL_FILES.filter((f) => f.endsWith('.md'))) {
-  const md = stripFences(read(f) ?? '');
+  const raw = read(f) ?? '';
+  if (raw.length > MAX_BYTES) { oversized.push(f); continue; }
+  const md = stripFences(raw);
   const targets = [
     ...[...md.matchAll(/\]\(([^)\s#]+)/g)].map((m) => m[1]),               // inline links, with or without a title
     ...[...md.matchAll(/^ {0,3}\[[^\]]+\]:[ \t]*(\S+)/gm)].map((m) => m[1]), // reference definitions
   ];
   for (const target of targets) {
     if (/^(https?:|mailto:)/.test(target)) continue;
+    if (target.startsWith('/')) { brokenLinks.push(`${f} -> ${target} (absolute path; use a repo-relative one)`); continue; }
     if (!fs.existsSync(path.resolve(path.dirname(path.join(ROOT, f)), target))) brokenLinks.push(`${f} -> ${target}`);
   }
 }
 check(brokenLinks.length === 0, `every relative markdown link resolves${listing(brokenLinks)}`);
+check(oversized.length === 0, `every markdown file is under ${MAX_BYTES / 1024} KB${listing(oversized)}`);
 
 // --- validator self-test ----------------------------------------------------------------
 // Prove the checker can fail: copy the repo, inject one violation per rule family, run
-// the copy's own check.js, and assert it goes red with exactly the expected lines.
+// the copy's own check.js, and assert it goes red with every expected FAIL line present.
 if (SELFTEST) {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'evolution-check-'));
-  try {
+  let tmp = null;
+  try { tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'evolution-check-')); }
+  catch (e) { fail(`selftest: cannot create a temp directory under ${os.tmpdir()} (${e.code ?? e.message})`); }
+  if (tmp !== null) try {
     fs.cpSync('.', tmp, {
       recursive: true,
       filter: (src) => {
@@ -328,7 +338,7 @@ if (SELFTEST) {
         [`FAIL  deconstruct: "${LANGUAGE_LINE}" is its own paragraph`,
           'FAIL  deconstruct: step 1 follows the language line directly']],
       ['skills/socratic/SKILL.md', (t) => t.replace(/^## 2\. /m, ' ### 2. '),
-        'FAIL  socratic: headings are H2 only — ### 2.'],
+        /FAIL {2}socratic: headings are H2 only — .*### 2\. /],
       ['skills/hidden-talents/SKILL.md', (t) => t.replace(/^(## 2\. .*)$/m, 'Big\n===\n\n$1'),
         'FAIL  hidden-talents: headings are H2 only — setext heading: Big'],
       ['skills/first-principles/SKILL.md', (t) => t.replace(/^Done when.*\r?\n/m, ''),
@@ -336,7 +346,7 @@ if (SELFTEST) {
       ['skills/two-axis-research/SKILL.md', (t) => { const i = t.lastIndexOf('\n## '); return t.slice(0, i) + t.slice(i).replace(/^- \*\*([^*\n]+)\*\* — /m, '- $1: '); },
         'FAIL  two-axis-research: final step lists the deliverable as bold-labelled bullets'],
       ['skills/socratic/SKILL.md', (t) => t.replace(/^(## 3\. .*)$/m, '> ### Source prompt\n> quoted for fidelity\n\n$1'),
-        /FAIL {2}socratic: headings are H2 only — ### 2\. [^\n]*, > ### Source prompt/],
+        /FAIL {2}socratic: headings are H2 only — .*### 2\. [^\n]*, > ### Source prompt/],
       ['skills/life-design/SKILL.md', (t) => t.replace(/\*\*/g, ''),
         'FAIL  life-design: framing paragraph bolds 1–3 leading words (0 bold)'],
       ['skills/two-layer-explain/SKILL.md', (t) => t.replace(/^(## 1\. .*)$/m, '$1 1️⃣'),
@@ -351,14 +361,28 @@ if (SELFTEST) {
         'FAIL  README 中文 section has a **`/<name>`** usage block for every skill — steelman'],
       ['HOUSE-STYLE.md', (t) => t.replace('](skills/steelman/SKILL.md)', '](skills/steelmen/SKILL.md "title")'),
         'FAIL  every relative markdown link resolves'],
+      ['skills/two-layer-explain/SKILL.md', (t) => t.replace(/^disable-model-invocation: true$/m, 'disable-model-invocation: false'),
+        'FAIL  two-layer-explain: disable-model-invocation is true'],
+      ['skills/fact-check/SKILL.md', (t) => t.replace(/^## 2\. /m, '## 3. '),
+        'FAIL  fact-check: steps are consecutively numbered H2s'],
+      ['skills/cross-domain/SKILL.md', (t) => t.replace('\n## 1. ', `\n${LANGUAGE_LINE}\n\n## 1. `),
+        'FAIL  cross-domain: the language line appears exactly once'],
+      ['skills/socratic/SKILL.md', (t) => t.replace(/\n---\n\n/, '\n---\n\n# A title first\n\n'),
+        'FAIL  socratic: body opens with a framing paragraph'],
+      ['.github/workflows/check.yml', (t) => t.replace('node scripts/check.js --selftest', 'node scripts/check.js'),
+        'FAIL  CI runs this script with --selftest'],
+      ['scripts/check.js', (t) => t.replace("'hidden-talents', 'life-design'];", "'hidden-talents', 'life-design', 'ghost'];"),
+        'FAIL  every INTERACTIVE entry is a skill — ghost'],
     ];
     for (const [file, transform] of cases) inject(file, transform);
     fs.writeFileSync(path.join(tmp, 'package.json'), '{}\n');
     fs.writeFileSync(path.join(tmp, 'skills/NOTES.md'), 'stray\n');
+    fs.mkdirSync(path.join(tmp, 'skills/zzz-empty'));
     const expected = [
       ...cases.flatMap((c) => c[2]),
       'FAIL  no dependency files anywhere — package.json',
       'FAIL  skills/ contains only skill directories — NOTES.md',
+      'FAIL  zzz-empty: SKILL.md exists',
     ];
 
     let out = '';
@@ -369,7 +393,7 @@ if (SELFTEST) {
     } catch (e) {
       out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
       status = e.status ?? 1;
-      if (e.status === undefined) spawnError = e.code ?? e.signal ?? String(e);
+      if (e.status == null) spawnError = e.code ?? e.signal ?? String(e);
     }
     const missing = expected.filter((exp) => (exp instanceof RegExp ? !exp.test(out) : !out.includes(exp)));
     const distinct = new Set(expected.map(String)).size;

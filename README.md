@@ -62,7 +62,7 @@ The one method from the same family that is **not** here is the expert panel (�
 /deconstruct  https://example.com/pricing — I want to learn how they structure the tiers
 ```
 
-**`/two-axis-research`** — a product, company, person, technology, industry, or event you want to understand systematically. Vertical axis: origin, turning points, and which early choices became today's capabilities or baggage. Horizontal axis: the comparators worth comparing, on uniform dimensions, and why the market picks or drops it. The two axes cross into three future paths with their preconditions and warning signals. Primary sources, dated citations, facts kept apart from inferences and opinions; a long report (10,000–30,000 characters). Pair it with your platform's deep-research mode.
+**`/two-axis-research`** — a product, company, person, technology, industry, or event you want to understand systematically. Vertical axis: origin, turning points, and which early choices became today's capabilities or baggage. Horizontal axis: the comparators worth comparing, on uniform dimensions, and why the market picks or drops it. The two axes cross into three future paths with their preconditions and warning signals. Primary sources, dated citations, facts kept apart from inferences and opinions; a long report (10,000–30,000 characters in Chinese, roughly 6,000–18,000 words in English). Pair it with your platform's deep-research mode.
 
 ```
 /two-axis-research  DuckDB
@@ -104,13 +104,13 @@ The one method from the same family that is **not** here is the expert panel (�
 
 ### Know yourself
 
-**`/hidden-talents`** — a 30-minute-plus interview (up to ten main questions, one per turn) that digs through what you did obsessively before sixteen, what feels too easy to need learning, what leaves you tired but lit up, and whom you have envied. Ends with a personal talent manual (~10,000 characters): the talents with their evidence chains, their shadow sides, your energy map, environments that help or hurt, working and career fits, and 30 days of experiments.
+**`/hidden-talents`** — a 30-minute-plus interview (up to ten main questions, one per turn) that digs through what you did obsessively before sixteen, what feels too easy to need learning, what leaves you tired but lit up, and whom you have envied. Ends with a personal talent manual (~10,000 characters in Chinese, roughly 6,000 words in English): the talents with their evidence chains, their shadow sides, your energy map, environments that help or hurt, working and career fits, and 30 days of experiments.
 
 ```
 /hidden-talents
 ```
 
-**`/life-design`** — an interview in four phases (six to nine main questions): where you are, your compass (workview vs lifeview), wayfinding through flow moments, and getting unstuck. Separates gravity problems you must accept from problems you can design. Ends with a life design blueprint (8,000–12,000 characters) built around three genuinely different five-year Odyssey plans, plus prototypes you can start this week.
+**`/life-design`** — an interview in four phases (six to nine main questions): where you are, your compass (workview vs lifeview), wayfinding through flow moments, and getting unstuck. Separates gravity problems you must accept from problems you can design. Ends with a life design blueprint (8,000–12,000 characters in Chinese, roughly 5,000–7,000 words in English) built around three genuinely different five-year Odyssey plans, plus prototypes you can start this week.
 
 ```
 /life-design
