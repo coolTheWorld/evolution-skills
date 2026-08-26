@@ -44,6 +44,7 @@ Second-person-implied imperatives ("Build the strongest case…", "Ask the singl
 
 ## Before opening a PR
 
+- `node scripts/check.js --selftest` passes. It is every mechanical rule on this page as an assertion, plus proof the checker can fail; CI runs the same command on every PR.
 - Frontmatter parses, keys in the order above, `name` equals the directory name.
 - `npx skills add <path-to-your-clone> --list` discovers the new skill.
 - Smoke-run it: from a temp project whose `.claude/skills` symlinks to `skills/`, run `claude -p "/<name> <realistic input>"` and check the first turn behaves as written (an interactive skill asks exactly one question and stops).

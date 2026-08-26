@@ -1,0 +1,62 @@
+name: checks
+
+# Zero-secret CI, modeled on coolTheWorld/stanford-oval-storm-skills' check.yml and
+# addyosmani/agent-skills' test-plugin-install.yml: HOUSE-STYLE.md as executable
+# assertions (plus a validator selftest), then a real install through the channel
+# the README promises — `npx skills add`. Nothing here needs an API key, so it runs
+# on pull requests from forks too.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: HOUSE-STYLE checks + validator selftest
+        run: node scripts/check.js --selftest
+
+  install-test:
+    runs-on: ubuntu-latest
+    needs: checks
+    timeout-minutes: 10
+    env:
+      NO_COLOR: 1 # runners set CI=true, which makes the skills CLI colourise "Found N skills" and break the grep below
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Discover every skill
+        run: |
+          expected=$(find "$GITHUB_WORKSPACE/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)
+          npx -y skills add "$GITHUB_WORKSPACE" --list </dev/null | tee discovered.txt
+          grep -q "Found $expected skills" discovered.txt
+      - name: Install into a fresh project
+        run: |
+          project=$(mktemp -d)
+          cd "$project"
+          npx -y skills add "$GITHUB_WORKSPACE" -a claude-code -s '*' -y </dev/null
+          status=0
+          for dir in "$GITHUB_WORKSPACE"/skills/*/; do
+            name=$(basename "$dir")
+            if [ -f ".claude/skills/$name/SKILL.md" ]; then
+              echo "installed  $name"
+            else
+              echo "MISSING    $name"
+              status=1
+            fi
+          done
+          exit $status
