@@ -2,10 +2,10 @@ name: checks
 
 # Zero-secret CI, modeled on coolTheWorld/stanford-oval-storm-skills' check.yml and
 # addyosmani/agent-skills' test-plugin-install.yml: HOUSE-STYLE.md as executable
-# assertions (plus a validator selftest), then a real install through both channels
+# assertions (plus a validator selftest), then a real install through every channel
 # the README promises — the Claude Code plugin (`evolution@evolution-skills`, which
-# is what makes every skill `/evolution:<name>`) and `npx skills add`. Nothing here
-# needs an API key, so it runs on pull requests from forks too.
+# is what makes every skill `/evolution:<name>`), the Codex plugin, and
+# `npx skills add`. Nothing here needs an API key, so it runs on fork PRs too.
 
 on:
   push:
@@ -48,6 +48,14 @@ jobs:
         run: claude plugin install evolution@evolution-skills
       - name: Verify the plugin is installed
         run: claude plugin list | grep -i evolution
+      - name: Install the Codex CLI
+        run: npm install -g @openai/codex
+      - name: Add this repo as a local Codex marketplace
+        run: codex plugin marketplace add ./
+      - name: Install the plugin from the local Codex marketplace
+        run: codex plugin add evolution@evolution-skills
+      - name: Verify the Codex plugin is installed
+        run: codex plugin list | grep -i evolution
 
   install-test:
     runs-on: ubuntu-latest

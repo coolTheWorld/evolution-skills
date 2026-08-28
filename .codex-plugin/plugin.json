@@ -1,0 +1,19 @@
+{
+  "name": "evolution",
+  "version": "1.1.0",
+  "description": "Eleven agent skills for thinking better, one per method: clarify the question, learn something new, solve the problem, decide, and know yourself.",
+  "author": {
+    "name": "coolTheWorld",
+    "url": "https://github.com/coolTheWorld"
+  },
+  "homepage": "https://github.com/coolTheWorld/evolution-skills",
+  "repository": "https://github.com/coolTheWorld/evolution-skills",
+  "license": "Apache-2.0",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "evolution-skills",
+    "shortDescription": "Eleven thinking skills: ask, learn, solve, decide, know yourself.",
+    "developerName": "coolTheWorld",
+    "category": "Productivity"
+  }
+}

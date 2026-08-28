@@ -44,6 +44,7 @@ Second-person-implied imperatives ("Build the strongest case…", "Ask the singl
 
 ## Before opening a PR
 
+- A version bump touches all three manifests (`.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`); the checker fails if they disagree.
 - `node scripts/check.js --selftest` and `claude plugin validate .` pass. The first is every mechanical rule on this page as an assertion, plus proof the checker can fail; CI runs both on every PR.
 - Frontmatter parses, keys in the order above, `name` equals the directory name.
 - `npx skills add <path-to-your-clone> --list` discovers the new skill.

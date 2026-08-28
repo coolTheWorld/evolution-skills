@@ -1,0 +1,22 @@
+{
+  "name": "evolution-skills",
+  "interface": {
+    "displayName": "evolution-skills"
+  },
+  "plugins": [
+    {
+      "name": "evolution",
+      "version": "1.1.0",
+      "description": "Eleven agent skills for thinking better: ask, learn, solve, decide, know yourself. Each is a proven prompt rewritten as a workflow with a completion bar on every step.",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
