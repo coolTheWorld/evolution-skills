@@ -8,6 +8,15 @@ Works with Claude Code, Cursor, and any other agent that reads `SKILL.md`.
 
 ## Install
 
+In Claude Code, install as a plugin. Every skill is then namespaced as `/evolution:<name>`:
+
+```bash
+/plugin marketplace add coolTheWorld/evolution-skills
+/plugin install evolution@evolution-skills
+```
+
+For Cursor and any other agent that reads `SKILL.md`, install the files themselves:
+
 ```bash
 # all eleven skills
 npx skills add coolTheWorld/evolution-skills
@@ -18,7 +27,9 @@ npx skills add coolTheWorld/evolution-skills --skill socratic
 
 To install by hand, copy `skills/<name>/SKILL.md` into `~/.claude/skills/<name>/SKILL.md`.
 
-Every skill is **user-invoked** (`disable-model-invocation: true`): in Claude Code the agent never fires one on its own, so they cost no context until you type the name. Invoke with `/<name>` followed by the thing you want it applied to.
+Skills installed as files carry no namespace: drop the `evolution:` prefix and type `/socratic`. The usage blocks below use the plugin form.
+
+Every skill is **user-invoked** (`disable-model-invocation: true`): in Claude Code the agent never fires one on its own, so they cost no context until you type the name. Invoke with `/evolution:<name>` followed by the thing you want it applied to.
 
 ## The skills
 
@@ -42,78 +53,78 @@ The one method from the same family that is **not** here is the expert panel (�
 
 ### Ask
 
-**`/socratic`** — when what you are asking is probably not what you want answered. The agent holds all advice, asks at most six questions (one per turn, each prefaced by what your last answer changed), then hands back the original question, the real problem, confirmed facts, unverified assumptions, the key variable, and one precise new question. It gives its judgement only after you confirm that question.
+**`/evolution:socratic`** — when what you are asking is probably not what you want answered. The agent holds all advice, asks at most six questions (one per turn, each prefaced by what your last answer changed), then hands back the original question, the real problem, confirmed facts, unverified assumptions, the key variable, and one precise new question. It gives its judgement only after you confirm that question.
 
 ```
-/socratic  our onboarding conversion dropped 30% after the redesign and I think it's the new pricing page
+/evolution:socratic  our onboarding conversion dropped 30% after the redesign and I think it's the new pricing page
 ```
 
 ### Learn
 
-**`/two-layer-explain`** — a concept you do not understand. Layer one uses everyday language and one concrete example; layer two uses exact terms and covers mechanism, boundaries, and common misconceptions. Ends with a layperson→technical mapping, the places you are most likely to get it wrong, and three questions that a memorised analogy cannot answer.
+**`/evolution:two-layer-explain`** — a concept you do not understand. Layer one uses everyday language and one concrete example; layer two uses exact terms and covers mechanism, boundaries, and common misconceptions. Ends with a layperson→technical mapping, the places you are most likely to get it wrong, and three questions that a memorised analogy cannot answer.
 
 ```
-/two-layer-explain  MVCC in Postgres
+/evolution:two-layer-explain  MVCC in Postgres
 ```
 
-**`/deconstruct`** — a finished piece of work you admire (a page, a plan, a dashboard, a process) and what you want to learn from it. Ends with 3–5 reusable rules, a checklist you can follow, and one small exercise to try first.
+**`/evolution:deconstruct`** — a finished piece of work you admire (a page, a plan, a dashboard, a process) and what you want to learn from it. Ends with 3–5 reusable rules, a checklist you can follow, and one small exercise to try first.
 
 ```
-/deconstruct  https://example.com/pricing — I want to learn how they structure the tiers
+/evolution:deconstruct  https://example.com/pricing — I want to learn how they structure the tiers
 ```
 
-**`/two-axis-research`** — a product, company, person, technology, industry, or event you want to understand systematically. Vertical axis: origin, turning points, and which early choices became today's capabilities or baggage. Horizontal axis: the comparators worth comparing, on uniform dimensions, and why the market picks or drops it. The two axes cross into three future paths with their preconditions and warning signals. Primary sources, dated citations, facts kept apart from inferences and opinions; a long report (10,000–30,000 characters in Chinese, roughly 6,000–18,000 words in English). Pair it with your platform's deep-research mode.
+**`/evolution:two-axis-research`** — a product, company, person, technology, industry, or event you want to understand systematically. Vertical axis: origin, turning points, and which early choices became today's capabilities or baggage. Horizontal axis: the comparators worth comparing, on uniform dimensions, and why the market picks or drops it. The two axes cross into three future paths with their preconditions and warning signals. Primary sources, dated citations, facts kept apart from inferences and opinions; a long report (10,000–30,000 characters in Chinese, roughly 6,000–18,000 words in English). Pair it with your platform's deep-research mode.
 
 ```
-/two-axis-research  DuckDB
+/evolution:two-axis-research  DuckDB
 ```
 
-**`/fact-check`** — a claim, a statistic, an opinion, or a plan. Facts get one of five verdicts (verified / holds but narrower / disputed / insufficient evidence / wrong); the reasoning is checked for hidden assumptions, correlation-as-causation, and missing alternatives. Ends with the strongest repaired version and how far you can trust it.
+**`/evolution:fact-check`** — a claim, a statistic, an opinion, or a plan. Facts get one of five verdicts (verified / holds but narrower / disputed / insufficient evidence / wrong); the reasoning is checked for hidden assumptions, correlation-as-causation, and missing alternatives. Ends with the strongest repaired version and how far you can trust it.
 
 ```
-/fact-check  "remote teams ship 20% slower than co-located ones"
+/evolution:fact-check  "remote teams ship 20% slower than co-located ones"
 ```
 
 ### Solve
 
-**`/first-principles`** — a problem that has been patched over so many times the patches are the problem. Separates unavoidable facts, unverified habitual assumptions, the real goal, and the real constraints, then re-derives a path from the facts alone. Ends with what in the current plan is surface repair, the new path, its premises, and the first step to verify it.
+**`/evolution:first-principles`** — a problem that has been patched over so many times the patches are the problem. Separates unavoidable facts, unverified habitual assumptions, the real goal, and the real constraints, then re-derives a path from the facts alone. Ends with what in the current plan is surface repair, the new path, its premises, and the first step to verify it.
 
 ```
-/first-principles  our deploy pipeline takes 45 minutes and every fix has added another stage
+/evolution:first-principles  our deploy pipeline takes 45 minutes and every fix has added another stage
 ```
 
-**`/cross-domain`** — a problem your field seems unable to solve. Strips the jargon, finds the underlying structure and core tension, then looks for the same structure in history and in at least three distant fields. Ends with the three mechanisms most worth borrowing, translated to your situation, and one low-cost reversible experiment.
+**`/evolution:cross-domain`** — a problem your field seems unable to solve. Strips the jargon, finds the underlying structure and core tension, then looks for the same structure in history and in at least three distant fields. Ends with the three mechanisms most worth borrowing, translated to your situation, and one low-cost reversible experiment.
 
 ```
-/cross-domain  reviewers rubber-stamp PRs because the queue is always full
+/evolution:cross-domain  reviewers rubber-stamp PRs because the queue is always full
 ```
 
 ### Decide
 
-**`/steelman`** — two options and you keep flip-flopping. Restates the real decision, argues the strongest case for *and* against, finds the **crux** — the one variable whose value flips the verdict — and asks you one question per turn until it is settled. Then a verdict with reasons and next actions.
+**`/evolution:steelman`** — two options and you keep flip-flopping. Restates the real decision, argues the strongest case for *and* against, finds the **crux** — the one variable whose value flips the verdict — and asks you one question per turn until it is settled. Then a verdict with reasons and next actions.
 
 ```
-/steelman  should we move off Postgres onto DynamoDB?
+/evolution:steelman  should we move off Postgres onto DynamoDB?
 ```
 
-**`/min-experiment`** — a decision that more thinking will not clarify. Finds the three assumptions behind it, picks the one most likely to change the outcome, and designs a low-cost, reversible experiment you can finish in 7 days (or a cycle you set): what to do, what it costs, what to measure, what says continue, what says stop, what you will know afterwards — and the first action for tomorrow.
+**`/evolution:min-experiment`** — a decision that more thinking will not clarify. Finds the three assumptions behind it, picks the one most likely to change the outcome, and designs a low-cost, reversible experiment you can finish in 7 days (or a cycle you set): what to do, what it costs, what to measure, what says continue, what says stop, what you will know afterwards — and the first action for tomorrow.
 
 ```
-/min-experiment  quitting to build the side project full-time
+/evolution:min-experiment  quitting to build the side project full-time
 ```
 
 ### Know yourself
 
-**`/hidden-talents`** — a 30-minute-plus interview (up to ten main questions, one per turn) that digs through what you did obsessively before sixteen, what feels too easy to need learning, what leaves you tired but lit up, and whom you have envied. Ends with a personal talent manual (~10,000 characters in Chinese, roughly 6,000 words in English): the talents with their evidence chains, their shadow sides, your energy map, environments that help or hurt, working and career fits, and 30 days of experiments.
+**`/evolution:hidden-talents`** — a 30-minute-plus interview (up to ten main questions, one per turn) that digs through what you did obsessively before sixteen, what feels too easy to need learning, what leaves you tired but lit up, and whom you have envied. Ends with a personal talent manual (~10,000 characters in Chinese, roughly 6,000 words in English): the talents with their evidence chains, their shadow sides, your energy map, environments that help or hurt, working and career fits, and 30 days of experiments.
 
 ```
-/hidden-talents
+/evolution:hidden-talents
 ```
 
-**`/life-design`** — an interview in four phases (six to nine main questions): where you are, your compass (workview vs lifeview), wayfinding through flow moments, and getting unstuck. Separates gravity problems you must accept from problems you can design. Ends with a life design blueprint (8,000–12,000 characters in Chinese, roughly 5,000–7,000 words in English) built around three genuinely different five-year Odyssey plans, plus prototypes you can start this week.
+**`/evolution:life-design`** — an interview in four phases (six to nine main questions): where you are, your compass (workview vs lifeview), wayfinding through flow moments, and getting unstuck. Separates gravity problems you must accept from problems you can design. Ends with a life design blueprint (8,000–12,000 characters in Chinese, roughly 5,000–7,000 words in English) built around three genuinely different five-year Odyssey plans, plus prototypes you can start this week.
 
 ```
-/life-design
+/evolution:life-design
 ```
 
 The two interviews are long by design. Answer concretely and keep going — the output is only as good as the stories you put in.
@@ -142,6 +153,15 @@ Apache-2.0
 
 ## 安装
 
+在 Claude Code 里装成插件，所有 skill 都会带上命名空间 `/evolution:<name>`：
+
+```bash
+/plugin marketplace add coolTheWorld/evolution-skills
+/plugin install evolution@evolution-skills
+```
+
+Cursor 等其他读取 `SKILL.md` 的 agent，直接安装文件：
+
 ```bash
 # 安装全部十一个
 npx skills add coolTheWorld/evolution-skills
@@ -152,7 +172,9 @@ npx skills add coolTheWorld/evolution-skills --skill socratic
 
 手动安装：把 `skills/<name>/SKILL.md` 复制到 `~/.claude/skills/<name>/SKILL.md`。
 
-所有 skill 都是**手动触发**（`disable-model-invocation: true`）：在 Claude Code 中 agent 不会自己调用它们，不占上下文；需要时输入 `/<name>` 加上你要处理的内容。
+以文件方式安装的 skill 没有命名空间：去掉 `evolution:` 前缀，直接输入 `/socratic`。下面的用法示例统一用插件形式。
+
+所有 skill 都是**手动触发**（`disable-model-invocation: true`）：在 Claude Code 中 agent 不会自己调用它们，不占上下文；需要时输入 `/evolution:<name>` 加上你要处理的内容。
 
 ## Skill 一览
 
@@ -176,78 +198,78 @@ npx skills add coolTheWorld/evolution-skills --skill socratic
 
 ### 问清问题
 
-**`/socratic`** —— 当你嘴上问的和心里想问的可能不是一回事。agent 先不给建议，最多问 6 个问题（每次一个，提问前先说一句上一条回答让它更新了什么判断），然后整理出：最开始的问题、真正想解决的问题、已确认的事实、仍未验证的假设、最可能改变结论的关键变量，以及一个准确、具体、可以继续行动的新问题。等你确认这个新问题后，才给出判断、理由和下一步行动。
+**`/evolution:socratic`** —— 当你嘴上问的和心里想问的可能不是一回事。agent 先不给建议，最多问 6 个问题（每次一个，提问前先说一句上一条回答让它更新了什么判断），然后整理出：最开始的问题、真正想解决的问题、已确认的事实、仍未验证的假设、最可能改变结论的关键变量，以及一个准确、具体、可以继续行动的新问题。等你确认这个新问题后，才给出判断、理由和下一步行动。
 
 ```
-/socratic  改版之后新用户转化掉了 30%，我觉得是新定价页的问题
+/evolution:socratic  改版之后新用户转化掉了 30%，我觉得是新定价页的问题
 ```
 
 ### 学习
 
-**`/two-layer-explain`** —— 一个完全听不懂的概念。第一层小白版：生活化语言加一个具体例子；第二层专业版：准确术语，讲清核心机制、适用边界和常见误解。最后给出小白说法与专业术语的对应关系、最容易理解错的地方，以及 3 个靠背类比答不出来的检验问题。
+**`/evolution:two-layer-explain`** —— 一个完全听不懂的概念。第一层小白版：生活化语言加一个具体例子；第二层专业版：准确术语，讲清核心机制、适用边界和常见误解。最后给出小白说法与专业术语的对应关系、最容易理解错的地方，以及 3 个靠背类比答不出来的检验问题。
 
 ```
-/two-layer-explain  Postgres 的 MVCC
+/evolution:two-layer-explain  Postgres 的 MVCC
 ```
 
-**`/deconstruct`** —— 一个你想模仿学习的优秀成品（页面、方案、看板、流程）和你想从中学到什么。最后给出 3 到 5 条可复用规律、一份可以照着执行的操作清单，以及一个最值得先尝试的小练习。
+**`/evolution:deconstruct`** —— 一个你想模仿学习的优秀成品（页面、方案、看板、流程）和你想从中学到什么。最后给出 3 到 5 条可复用规律、一份可以照着执行的操作清单，以及一个最值得先尝试的小练习。
 
 ```
-/deconstruct  https://example.com/pricing —— 我想学它是怎么设计定价档位的
+/evolution:deconstruct  https://example.com/pricing —— 我想学它是怎么设计定价档位的
 ```
 
-**`/two-axis-research`** —— 想系统研究的产品、公司、人物、技术、行业或事件。纵轴：诞生背景、重要转折、哪些早期选择变成了今天的能力或包袱。横轴：最值得比较的对象、统一维度的对比、市场为什么选它又为什么放弃它。两轴交叉，推出未来最可能的 3 条路径及其前提和预警信号。优先一手来源、就近标注来源与日期、事实与推断与观点分开写；报告 10000～30000 字。建议配合平台的深度研究功能使用。
+**`/evolution:two-axis-research`** —— 想系统研究的产品、公司、人物、技术、行业或事件。纵轴：诞生背景、重要转折、哪些早期选择变成了今天的能力或包袱。横轴：最值得比较的对象、统一维度的对比、市场为什么选它又为什么放弃它。两轴交叉，推出未来最可能的 3 条路径及其前提和预警信号。优先一手来源、就近标注来源与日期、事实与推断与观点分开写；报告 10000～30000 字。建议配合平台的深度研究功能使用。
 
 ```
-/two-axis-research  DuckDB
+/evolution:two-axis-research  DuckDB
 ```
 
-**`/fact-check`** —— 一个说法、一个数据、一个观点或一份方案。事实部分逐条联网核查并标记五档之一（已证实 / 基本成立但需收窄 / 存在争议 / 证据不足 / 明显错误）；推理部分检查隐藏假设、相关与因果的混淆、遗漏的解释。最后给出补强后的最合理版本，以及你目前可以相信到什么程度。
+**`/evolution:fact-check`** —— 一个说法、一个数据、一个观点或一份方案。事实部分逐条联网核查并标记五档之一（已证实 / 基本成立但需收窄 / 存在争议 / 证据不足 / 明显错误）；推理部分检查隐藏假设、相关与因果的混淆、遗漏的解释。最后给出补强后的最合理版本，以及你目前可以相信到什么程度。
 
 ```
-/fact-check  "远程团队的交付速度比坐在一起的团队慢 20%"
+/evolution:fact-check  "远程团队的交付速度比坐在一起的团队慢 20%"
 ```
 
 ### 解决问题
 
-**`/first-principles`** —— 一个补丁打到补丁本身成了问题的方案。区分无法绕开的基本事实、习惯性接受却没验证过的假设、真正的目标和现实约束，只从事实出发重新推导。最后给出原方案里只在修补表面的部分、新路径、它成立的前提，以及验证它的第一步。
+**`/evolution:first-principles`** —— 一个补丁打到补丁本身成了问题的方案。区分无法绕开的基本事实、习惯性接受却没验证过的假设、真正的目标和现实约束，只从事实出发重新推导。最后给出原方案里只在修补表面的部分、新路径、它成立的前提，以及验证它的第一步。
 
 ```
-/first-principles  我们的部署流水线要跑 45 分钟，每次修问题都又加了一段
+/evolution:first-principles  我们的部署流水线要跑 45 分钟，每次修问题都又加了一段
 ```
 
-**`/cross-domain`** —— 在本行业里似乎无解的问题。剥掉行业术语，找出底层结构和核心矛盾，再到历史案例和至少 3 个相距较远的领域里找同构问题。最后选出最值得借用的 3 种机制，翻译成适合你处境的方案，并推荐一个低成本、可逆的实验。
+**`/evolution:cross-domain`** —— 在本行业里似乎无解的问题。剥掉行业术语，找出底层结构和核心矛盾，再到历史案例和至少 3 个相距较远的领域里找同构问题。最后选出最值得借用的 3 种机制，翻译成适合你处境的方案，并推荐一个低成本、可逆的实验。
 
 ```
-/cross-domain  评审队列永远是满的，所以 reviewer 都在走过场
+/evolution:cross-domain  评审队列永远是满的，所以 reviewer 都在走过场
 ```
 
 ### 决策
 
-**`/steelman`** —— 两个选项来回摇摆。先重述你真正要做的选择，为两边各建立最强论证，找出 **crux**——那个一旦翻转结论就翻转的变量——每轮只问你一个问题，直到 crux 落定，再给出裁决、理由和下一步行动。
+**`/evolution:steelman`** —— 两个选项来回摇摆。先重述你真正要做的选择，为两边各建立最强论证，找出 **crux**——那个一旦翻转结论就翻转的变量——每轮只问你一个问题，直到 crux 落定，再给出裁决、理由和下一步行动。
 
 ```
-/steelman  要不要从 Postgres 迁到 DynamoDB？
+/evolution:steelman  要不要从 Postgres 迁到 DynamoDB？
 ```
 
-**`/min-experiment`** —— 继续纸上谈兵也不会更清楚的决定。找出背后最需要验证的 3 个假设，选出最可能改变结论的那一个，围绕它设计一个低成本、可逆、7 天内（或你定的周期）能完成的最小实验：做什么、投入多少、观察什么指标、什么结果支持继续、什么结果提醒停止、结束后能获得什么新信息——以及明天就能开始的第一个动作。
+**`/evolution:min-experiment`** —— 继续纸上谈兵也不会更清楚的决定。找出背后最需要验证的 3 个假设，选出最可能改变结论的那一个，围绕它设计一个低成本、可逆、7 天内（或你定的周期）能完成的最小实验：做什么、投入多少、观察什么指标、什么结果支持继续、什么结果提醒停止、结束后能获得什么新信息——以及明天就能开始的第一个动作。
 
 ```
-/min-experiment  辞职全职做副业项目
+/evolution:min-experiment  辞职全职做副业项目
 ```
 
 ### 认识自己
 
-**`/hidden-talents`** —— 半小时以上的问诊（最多 10 个主问题，每次一个），从 16 岁以前废寝忘食做的事、"这还需要学吗"的无意识胜任区、身体累但精神亢奋的事、以及你嫉妒过的人里，挖出被忽视或压抑的天赋。最后输出一万字左右的《个人天赋使用说明书》：每项天赋及其经历链、天赋的阴影面、能量地图、最容易发挥和失效的环境、适合的工作与职业方向，以及接下来 30 天的低成本实验。
+**`/evolution:hidden-talents`** —— 半小时以上的问诊（最多 10 个主问题，每次一个），从 16 岁以前废寝忘食做的事、"这还需要学吗"的无意识胜任区、身体累但精神亢奋的事、以及你嫉妒过的人里，挖出被忽视或压抑的天赋。最后输出一万字左右的《个人天赋使用说明书》：每项天赋及其经历链、天赋的阴影面、能量地图、最容易发挥和失效的环境、适合的工作与职业方向，以及接下来 30 天的低成本实验。
 
 ```
-/hidden-talents
+/evolution:hidden-talents
 ```
 
-**`/life-design`** —— 四个阶段的问诊（6 到 9 个主问题）：你在这里、你的指南针（工作观 vs 人生观）、寻路（心流时刻）、摆脱困境。区分必须接受的重力问题和可以动手设计的真问题。最后输出 8000 到 12000 字的《个人人生设计蓝图》，核心是三个完全不同的五年奥德赛计划，以及本周就能开始的原型行动。
+**`/evolution:life-design`** —— 四个阶段的问诊（6 到 9 个主问题）：你在这里、你的指南针（工作观 vs 人生观）、寻路（心流时刻）、摆脱困境。区分必须接受的重力问题和可以动手设计的真问题。最后输出 8000 到 12000 字的《个人人生设计蓝图》，核心是三个完全不同的五年奥德赛计划，以及本周就能开始的原型行动。
 
 ```
-/life-design
+/evolution:life-design
 ```
 
 这两个问诊交互时间都比较长，是有意为之。回答得越真实、越具体，最后得到的东西就越有用——一定要坚持下去。
