@@ -156,6 +156,7 @@ function headingsOf(lines) {
 // --- required files, no dependencies ------------------------------------------------
 const REQUIRED = ['README.md', 'HOUSE-STYLE.md', 'LICENSE', 'scripts/check.js',
   '.claude-plugin/plugin.json', '.claude-plugin/marketplace.json',
+  '.codex-plugin/plugin.json', '.agents/plugins/marketplace.json',
   ...WORKFLOWS.map((w) => `.github/workflows/${w}`)];
 for (const f of REQUIRED) check(fs.existsSync(f), `exists: ${f}`);
 
@@ -179,7 +180,24 @@ check(plugin !== null && !plugin.hooks && !plugin.mcpServers, 'plugin.json decla
 check(market !== null && market.name === MARKETPLACE, `marketplace name is '${MARKETPLACE}'`);
 const entry = market && Array.isArray(market.plugins) ? market.plugins.find((e) => e.name === PLUGIN) : null;
 check(entry != null && entry.source === './', `marketplace lists plugin '${PLUGIN}' with source './'`);
-check(ci.includes(`${PLUGIN}@${MARKETPLACE}`), "CI install test uses the manifests' own coordinate");
+check(ci.includes(`claude plugin install ${PLUGIN}@${MARKETPLACE}`) && ci.includes(`codex plugin add ${PLUGIN}@${MARKETPLACE}`),
+  "CI installs both plugins by the manifests' own coordinate");
+
+// The same skills also ship as a Codex plugin, so all three manifests must name the
+// same plugin at the same version — a drift would install a stale copy for one tool.
+const codexPlugin = json('.codex-plugin/plugin.json');
+const codexMarket = json('.agents/plugins/marketplace.json');
+check(codexPlugin !== null, 'codex plugin.json is valid JSON');
+check(codexMarket !== null, 'codex marketplace.json is valid JSON');
+check(codexPlugin !== null && codexPlugin.name === PLUGIN, `codex plugin name is '${PLUGIN}'`);
+check(codexPlugin !== null && codexPlugin.skills === './skills/', "codex plugin.json points at './skills/'");
+check(codexMarket !== null && codexMarket.name === MARKETPLACE, `codex marketplace name is '${MARKETPLACE}'`);
+const codexEntry = codexMarket && Array.isArray(codexMarket.plugins) ? codexMarket.plugins.find((e) => e.name === PLUGIN) : null;
+check(codexEntry != null && codexEntry.source != null && codexEntry.source.source === 'local' && codexEntry.source.path === './',
+  `codex marketplace lists plugin '${PLUGIN}' from './'`);
+const versions = [plugin && plugin.version, codexPlugin && codexPlugin.version, codexEntry && codexEntry.version];
+const versionsAgree = versions[0] != null && versions.every((v) => v === versions[0]);
+check(versionsAgree, `every manifest declares the same version${versionsAgree ? ` (${versions[0]})` : ` — found ${versions.join(', ')}`}`);
 
 // Nothing this plugin ships may execute on a user's machine: skills are prose, and
 // hooks/, commands/ and .mcp.json are the component types Claude Code would run.
@@ -389,6 +407,10 @@ if (SELFTEST) {
         "FAIL  plugin name is 'evolution'"],
       ['.claude-plugin/marketplace.json', (t) => t.replace('"source": "./"', '"source": "./skills"'),
         "FAIL  marketplace lists plugin 'evolution' with source './'"],
+      ['.codex-plugin/plugin.json', (t) => t.replace('"name": "evolution"', '"name": "evolutions"'),
+        "FAIL  codex plugin name is 'evolution'"],
+      ['.agents/plugins/marketplace.json', (t) => t.replace('"version": "1.1.0"', '"version": "9.9.9"'),
+        'FAIL  every manifest declares the same version — found'],
       ['HOUSE-STYLE.md', (t) => t.replace('](skills/steelman/SKILL.md)', '](skills/steelmen/SKILL.md "title")'),
         'FAIL  every relative markdown link resolves'],
       ['skills/two-layer-explain/SKILL.md', (t) => t.replace(/^disable-model-invocation: true$/m, 'disable-model-invocation: false'),

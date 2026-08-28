@@ -4,18 +4,25 @@
 
 Eleven agent skills for thinking better, one per method: clarify the question, learn something new, solve the problem, decide, and know yourself. Each skill turns a proven prompt into a workflow the agent runs step by step — with a completion bar on every step — instead of a paragraph it can skim.
 
-Works with Claude Code, Cursor, and any other agent that reads `SKILL.md`.
+Works with Claude Code, Codex, Cursor, and any other agent that reads `SKILL.md`.
 
 ## Install
 
-In Claude Code, install as a plugin. Every skill is then namespaced as `/evolution:<name>`:
+**Claude Code** — install as a plugin, and every skill is namespaced as `/evolution:<name>`:
 
 ```bash
 /plugin marketplace add coolTheWorld/evolution-skills
 /plugin install evolution@evolution-skills
 ```
 
-For Cursor and any other agent that reads `SKILL.md`, install the files themselves:
+**Codex** — install the same repository as a Codex plugin:
+
+```bash
+codex plugin marketplace add coolTheWorld/evolution-skills
+codex plugin add evolution@evolution-skills
+```
+
+**Cursor, and any other agent that reads `SKILL.md`** — install the files:
 
 ```bash
 # all eleven skills
@@ -27,7 +34,13 @@ npx skills add coolTheWorld/evolution-skills --skill socratic
 
 To install by hand, copy `skills/<name>/SKILL.md` into `~/.claude/skills/<name>/SKILL.md`.
 
-Skills installed as files carry no namespace: drop the `evolution:` prefix and type `/socratic`. The usage blocks below use the plugin form.
+Only Claude Code namespaces skills by plugin; the other tools use the bare name. The usage blocks below use the Claude Code form:
+
+| Tool | Invoke |
+| --- | --- |
+| Claude Code | `/evolution:socratic` |
+| Codex | `$socratic` |
+| Cursor, or files installed by hand | `/socratic` |
 
 Every skill is **user-invoked** (`disable-model-invocation: true`): in Claude Code the agent never fires one on its own, so they cost no context until you type the name. Invoke with `/evolution:<name>` followed by the thing you want it applied to.
 
@@ -149,18 +162,25 @@ Apache-2.0
 
 十一个帮助你把事情想清楚的 agent skill，每个对应一种方法：问清问题、学习新东西、解决问题、做决定、认识自己。每个 skill 把一条经过验证的 Prompt 改写成 agent 逐步执行的工作流——每一步都有完成标准——而不是一段可以一扫而过的文字。
 
-适用于 Claude Code、Cursor，以及任何能读取 `SKILL.md` 的 agent。
+适用于 Claude Code、Codex、Cursor，以及任何能读取 `SKILL.md` 的 agent。
 
 ## 安装
 
-在 Claude Code 里装成插件，所有 skill 都会带上命名空间 `/evolution:<name>`：
+**Claude Code** —— 装成插件，所有 skill 都会带上命名空间 `/evolution:<name>`：
 
 ```bash
 /plugin marketplace add coolTheWorld/evolution-skills
 /plugin install evolution@evolution-skills
 ```
 
-Cursor 等其他读取 `SKILL.md` 的 agent，直接安装文件：
+**Codex** —— 同一个仓库也可以作为 Codex 插件安装：
+
+```bash
+codex plugin marketplace add coolTheWorld/evolution-skills
+codex plugin add evolution@evolution-skills
+```
+
+**Cursor，以及其他读取 `SKILL.md` 的 agent** —— 直接安装文件：
 
 ```bash
 # 安装全部十一个
@@ -172,7 +192,13 @@ npx skills add coolTheWorld/evolution-skills --skill socratic
 
 手动安装：把 `skills/<name>/SKILL.md` 复制到 `~/.claude/skills/<name>/SKILL.md`。
 
-以文件方式安装的 skill 没有命名空间：去掉 `evolution:` 前缀，直接输入 `/socratic`。下面的用法示例统一用插件形式。
+只有 Claude Code 会按插件加命名空间，其他工具用裸名。下面的用法示例统一用 Claude Code 的形式：
+
+| 工具 | 调用方式 |
+| --- | --- |
+| Claude Code | `/evolution:socratic` |
+| Codex | `$socratic` |
+| Cursor，或手动安装的文件 | `/socratic` |
 
 所有 skill 都是**手动触发**（`disable-model-invocation: true`）：在 Claude Code 中 agent 不会自己调用它们，不占上下文；需要时输入 `/evolution:<name>` 加上你要处理的内容。
 
