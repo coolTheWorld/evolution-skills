@@ -45,6 +45,10 @@ const EXEMPT_FROM_MAX = ['life-design'];
 // list is declared: a new interactive skill is added here in the same PR.
 const INTERACTIVE = ['socratic', 'steelman', 'hidden-talents', 'life-design'];
 const WORKFLOWS = ['check.yml', 'claude-code-review.yml', 'claude.yml'];
+// The plugin coordinate. It is what gives every skill its `/evolution:<name>` form,
+// so the manifests, the README usage blocks and the CI install test must all agree.
+const PLUGIN = 'evolution';
+const MARKETPLACE = 'evolution-skills';
 // A skill is 45-90 lines; the parsers below are quadratic on pathological input, so cap what they see.
 const MAX_BYTES = 64 * 1024;
 
@@ -151,6 +155,7 @@ function headingsOf(lines) {
 
 // --- required files, no dependencies ------------------------------------------------
 const REQUIRED = ['README.md', 'HOUSE-STYLE.md', 'LICENSE', 'scripts/check.js',
+  '.claude-plugin/plugin.json', '.claude-plugin/marketplace.json',
   ...WORKFLOWS.map((w) => `.github/workflows/${w}`)];
 for (const f of REQUIRED) check(fs.existsSync(f), `exists: ${f}`);
 
@@ -161,6 +166,27 @@ check(depsFound.length === 0, `no dependency files anywhere${listing(depsFound)}
 
 const ci = read('.github/workflows/check.yml') ?? '';
 check(ci.includes('node scripts/check.js --selftest'), 'CI runs this script with --selftest');
+
+// --- plugin manifests: the source of the /evolution:<name> namespace ----------------
+const json = (f) => { try { return JSON.parse(read(f) ?? ''); } catch { return null; } };
+const plugin = json('.claude-plugin/plugin.json');
+const market = json('.claude-plugin/marketplace.json');
+check(plugin !== null, 'plugin.json is valid JSON');
+check(market !== null, 'marketplace.json is valid JSON');
+check(plugin !== null && plugin.name === PLUGIN, `plugin name is '${PLUGIN}' (skills are invoked as /${PLUGIN}:<name>)`);
+check(plugin !== null && /^\d+\.\d+\.\d+$/.test(plugin.version ?? ''), `plugin version is semver (found ${plugin && plugin.version})`);
+check(plugin !== null && !plugin.hooks && !plugin.mcpServers, 'plugin.json declares no hooks and no mcpServers');
+check(market !== null && market.name === MARKETPLACE, `marketplace name is '${MARKETPLACE}'`);
+const entry = market && Array.isArray(market.plugins) ? market.plugins.find((e) => e.name === PLUGIN) : null;
+check(entry != null && entry.source === './', `marketplace lists plugin '${PLUGIN}' with source './'`);
+check(ci.includes(`${PLUGIN}@${MARKETPLACE}`), "CI install test uses the manifests' own coordinate");
+
+// Nothing this plugin ships may execute on a user's machine: skills are prose, and
+// hooks/, commands/ and .mcp.json are the component types Claude Code would run.
+const EXEC_PATHS = ['hooks', 'commands', '.mcp.json', 'mcp'];
+const execFound = EXEC_PATHS.filter((f) => fs.existsSync(f))
+  .concat(ALL_FILES.filter((f) => /\.(py|sh)$/.test(f)));
+check(execFound.length === 0, `no executable plugin components (hooks/, commands/, .mcp.json, .py, .sh)${listing(execFound)}`);
 
 // --- skills/ ------------------------------------------------------------------------
 const skillEntries = fs.existsSync('skills') ? fs.readdirSync('skills', { withFileTypes: true }) : [];
@@ -266,8 +292,8 @@ for (const [label, section] of SECTIONS) {
     (missingRows.length ? ` — missing: ${missingRows.join(', ')}` : '') +
     (extraRows.length ? ` — not a skill: ${extraRows.join(', ')}` : '') +
     (dupRows.length ? ` — listed twice: ${dupRows.join(', ')}` : ''));
-  const noUsage = skills.filter((s) => !new RegExp(`^\\*\\*\`/${s}\`\\*\\* `, 'm').test(section));
-  check(noUsage.length === 0, `README ${label} section has a **\`/<name>\`** usage block for every skill${listing(noUsage)}`);
+  const noUsage = skills.filter((s) => !new RegExp(`^\\*\\*\`/${PLUGIN}:${s}\`\\*\\* `, 'm').test(section));
+  check(noUsage.length === 0, `README ${label} section has a **\`/${PLUGIN}:<name>\`** usage block for every skill${listing(noUsage)}`);
 }
 
 // --- every relative markdown link resolves -------------------------------------------
@@ -357,8 +383,12 @@ if (SELFTEST) {
         'FAIL  hidden-talents: interactive skill contains'],
       ['README.md', (t) => t.replace(/^\|[^\n]*\[`socratic`\]\(skills\/socratic\/SKILL\.md\)[^\n]*\n/m, ''),
         'FAIL  README English table lists exactly the skills in skills/ — missing: socratic'],
-      ['README.md', (t) => { const i = t.search(/^# 中文说明/m); return t.slice(0, i) + t.slice(i).replace(/^\*\*`\/steelman`\*\* /m, '`/steelman` '); },
-        'FAIL  README 中文 section has a **`/<name>`** usage block for every skill — steelman'],
+      ['README.md', (t) => { const i = t.search(/^# 中文说明/m); return t.slice(0, i) + t.slice(i).replace(/^\*\*`\/evolution:steelman`\*\* /m, '`/evolution:steelman` '); },
+        'FAIL  README 中文 section has a **`/evolution:<name>`** usage block for every skill — steelman'],
+      ['.claude-plugin/plugin.json', (t) => t.replace('"name": "evolution"', '"name": "evolutions"'),
+        "FAIL  plugin name is 'evolution'"],
+      ['.claude-plugin/marketplace.json', (t) => t.replace('"source": "./"', '"source": "./skills"'),
+        "FAIL  marketplace lists plugin 'evolution' with source './'"],
       ['HOUSE-STYLE.md', (t) => t.replace('](skills/steelman/SKILL.md)', '](skills/steelmen/SKILL.md "title")'),
         'FAIL  every relative markdown link resolves'],
       ['skills/two-layer-explain/SKILL.md', (t) => t.replace(/^disable-model-invocation: true$/m, 'disable-model-invocation: false'),
@@ -378,11 +408,14 @@ if (SELFTEST) {
     fs.writeFileSync(path.join(tmp, 'package.json'), '{}\n');
     fs.writeFileSync(path.join(tmp, 'skills/NOTES.md'), 'stray\n');
     fs.mkdirSync(path.join(tmp, 'skills/zzz-empty'));
+    fs.mkdirSync(path.join(tmp, 'hooks'), { recursive: true });
+    fs.writeFileSync(path.join(tmp, 'hooks/hooks.json'), '{"PreToolUse":[]}\n');
     const expected = [
       ...cases.flatMap((c) => c[2]),
       'FAIL  no dependency files anywhere — package.json',
       'FAIL  skills/ contains only skill directories — NOTES.md',
       'FAIL  zzz-empty: SKILL.md exists',
+      'FAIL  no executable plugin components (hooks/, commands/, .mcp.json, .py, .sh) — hooks',
     ];
 
     let out = '';

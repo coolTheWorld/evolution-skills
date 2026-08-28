@@ -1,0 +1,15 @@
+{
+  "name": "evolution-skills",
+  "description": "Home of the evolution plugin — eleven thinking skills, each a proven prompt rewritten as an agent workflow with a completion bar on every step.",
+  "owner": {
+    "name": "coolTheWorld",
+    "url": "https://github.com/coolTheWorld"
+  },
+  "plugins": [
+    {
+      "name": "evolution",
+      "source": "./",
+      "description": "Eleven agent skills for thinking better: ask, learn, solve, decide, know yourself. Every skill is user-invoked as /evolution:<name>."
+    }
+  ]
+}
